@@ -1,0 +1,84 @@
+<main class="w-screen h-screen bg-sky-200 flex flex-col justify-center items-center overflow-hidden font-bold">
+
+  <!-- Game Container -->
+  <div class="relative w-full max-w-[400px] h-full max-h-[800px] bg-gradient-to-b from-sky-300 to-sky-500 shadow-2xl overflow-hidden">
+
+    @switch (gameState()) {
+      @case ('menu') {
+        <div class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/50 p-4 text-white text-center">
+          <h1 class="text-7xl font-black text-yellow-300 drop-shadow-[0_4px_2px_rgba(0,0,0,0.4)]" style="font-family: 'Nunito', sans-serif;">Foodie Runner</h1>
+          <p class="mt-4 text-2xl text-white/90">Collect food, dodge obstacles!</p>
+          <button (click)="startGame()" class="mt-12 bg-green-500 hover:bg-green-600 text-white text-3xl font-bold py-4 px-10 rounded-full shadow-lg transform hover:scale-105 transition-transform duration-200">
+            Play Game
+          </button>
+          <div class="mt-12 text-lg">
+            <h3 class="text-xl font-bold mb-2">Controls</h3>
+            <p><span class="inline-block w-16">W / ↑</span> : Jump</p>
+            <p><span class="inline-block w-16">S / ↓</span> : Slide</p>
+            <p><span class="inline-block w-16">A / ←</span> : Move Left</p>
+            <p><span class="inline-block w-16">D / →</span> : Move Right</p>
+          </div>
+        </div>
+      }
+      @case ('gameOver') {
+        <div class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/70 p-4 text-white text-center">
+          <h2 class="text-6xl font-black text-red-500 drop-shadow-lg">Game Over</h2>
+          <p class="mt-2 text-xl">You ran out of energy!</p>
+          <p class="mt-4 text-3xl">Your Score: <span class="text-yellow-300">{{ score() }}</span></p>
+          <p class="mt-2 text-xl">High Score: <span class="text-green-400">{{ highScore() }}</span></p>
+          <button (click)="startGame()" class="mt-12 bg-blue-500 hover:bg-blue-600 text-white text-2xl font-bold py-3 px-8 rounded-full shadow-lg transform hover:scale-105 transition-transform duration-200">
+            Play Again
+          </button>
+        </div>
+      }
+    }
+
+    <!-- Game UI -->
+    @if (gameState() === 'playing') {
+      <div class="absolute top-4 left-4 right-4 z-40 flex items-center gap-4">
+        <!-- Score -->
+        <div class="bg-black/40 text-white px-4 py-2 rounded-lg text-2xl shadow-md whitespace-nowrap">
+          Score: <span class="font-black text-yellow-300">{{ score() }}</span>
+        </div>
+        <!-- Hunger Meter -->
+        <div class="flex-1 bg-black/40 p-1 rounded-full shadow-md">
+          <div class="h-5 rounded-full transition-all duration-300" [class]="hungerBarClass()" [style.width]="hunger() + '%'"></div>
+        </div>
+      </div>
+    }
+
+    <!-- Game World -->
+    <div class="absolute inset-0" style="perspective: 600px; perspective-origin: 50% 40%;">
+      <div class="relative w-full h-full" style="transform-style: preserve-3d;">
+
+        <!-- Floor -->
+        <div class="absolute w-[300px] h-[200%] left-1/2 -translate-x-1/2 top-1/2 bg-gray-500"
+             style="transform: rotateX(75deg); background-image: repeating-linear-gradient(to bottom, #71717a, #71717a 40px, #a1a1aa 40px, #a1a1aa 80px);">
+        </div>
+
+        <!-- Player -->
+        <div class="absolute left-1/2 bottom-12 w-20 bg-blue-400 rounded-t-lg shadow-lg border-b-4 border-blue-600"
+             [class]="playerTransitionClass() + ' ' + playerSizeClass() + ' ' + playerInvincibleClass()"
+             [style.transform]="playerTransform() + ' translateZ(' + config.PLAYER_Z_POS + 'px) translateX(-50%)'">
+        </div>
+
+        <!-- Obstacles and Collectibles -->
+        @for (item of obstacles(); track item.id) {
+          <div class="absolute w-24 h-24 flex items-center justify-center text-5xl" 
+               [style.transform]="'translateX(-50%) translate3d(' + item.position.x + 'px, ' + item.position.y + 'px, ' + item.position.z + 'px)'"
+               [style.left]="'50%'">
+              {{ item.emoji }}
+          </div>
+        }
+        @for (item of collectibles(); track item.id) {
+          <div class="absolute w-16 h-16 flex items-center justify-center text-4xl bobbing"
+               [style.transform]="'translateX(-50%) translate3d(' + item.position.x + 'px, ' + item.position.y + 'px, ' + item.position.z + 'px)'"
+               [style.left]="'50%'">
+              {{ item.emoji }}
+          </div>
+        }
+
+      </div>
+    </div>
+  </div>
+</main>
